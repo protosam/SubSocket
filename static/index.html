@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <script type="text/javascript">            
+            var ws = new WebSocket('ws://localhost:8080/socket');
+
+            ws.onopen = function(){
+                //ws.send("sub test-channel-global");
+            }
+
+            ws.onmessage = function(event) {
+                console.log('Message: ' + event.data);
+            };
+
+            ws.onclose = function(event){
+                console.log("Disconnected...");
+            }
+
+            function AuthAdmin(){
+                ws.send("admin-token 123456");
+            }
+
+            function SetupTestChannels(){
+                var headers = new Headers();
+                headers.append("Admin-Token", "123456");
+
+                var requestOptions = { method: 'GET',
+                headers: headers,
+                redirect: 'follow'
+                };
+
+                // put the test-channel-global so people can subscribe for global broadcasts
+                fetch("/api.v1/channels/put?name=test-channel-global&is-public=yes&allow-broadcast=no", requestOptions)
+                    .then(response => response.text())
+                    .then(result => console.log(result))
+
+                // put the test-channel-system so only admins can read it but everybody can send to it
+                fetch("/api.v1/channels/put?name=test-channel-system&is-public=no&allow-broadcast=yes", requestOptions)
+                    .then(response => response.text())
+                    .then(result => {
+                    console.log(result)
+                    })
+                .catch(error => console.log('error', error));
+            }
+
+        </script>
+    </head>
+    <body>
+Open up the developer console and check out the source code of this file to see how to use SubSocket.<br><br>
+<pre>
+Test Functions:
+    AuthAdmin()
+    SetupTestChannels()
+    ws.send(input)
+
+Open one instance of this page. The first one will be the admin client. Run the following commands for setup:
+    AuthAdmin()
+    SetupTestChannels()
+
+    // wait a moment before running this one, we want to make sure SetupTestChannels() completes... async hell nature of JS... thanks event loop.
+    ws.send("sub test-channel-system");
+
+In another instance of this page, that will be a generic client. We will subscribe it to global.
+    ws.send("sub test-channel-global");
+    ws.send("pub test-channel-system Hey admin client!");
+
+On admin client:
+    ws.send("pub test-channel-global Hey clients on global!");
+    ws.send("broadcast Hey all clients!");
+    ws.send("message UUID_OF_CLIENT_FROM_DEV_CONSOLE Hey directly at you client.");
+
+</pre>
+    </body>
+</html>

@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <script type="text/javascript">
+var headers = new Headers();
+headers.append("Admin-Token", "123456");
+
+var requestOptions = { method: 'GET',
+  headers: headers,
+  redirect: 'follow'
+};
+
+// put the test-channel-global so people can subscribe for global broadcasts
+fetch("/api.v1/channels/put?name=test-channel-global&is-public=yes&allow-broadcast=no", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
+
+// put the test-channel-system so only admins can read it but everybody can send to it
+fetch("/api.v1/channels/put?name=test-channel-system&is-public=no&allow-broadcast=yes", requestOptions)
+    .then(response => response.text())
+    .then(result => {
+        console.log(result)
+    })
+    .catch(error => console.log('error', error));
+
+// Websockets!!!
+            var ws = new WebSocket('ws://localhost:8080/socket');
+
+            ws.onopen = function(){
+                ws.send("admin-token 123456");
+                //ws.send("sub test-channel-system");
+            }
+
+            ws.onmessage = function(event) {
+                console.log('Message: ' + event.data);
+            };
+
+            ws.onclose = function(event){
+                console.log("Disconnected...");
+            }
+
+        </script>
+    </head>
+    <body>
+
+    </body>
+</html>
+
+
