@@ -1,5 +1,5 @@
 # SubSocket (Prototype)
-A subscription based messaging queue delivered over websockets.
+A subscription based messaging over websockets.
 
 ## Testing it out
 From the commandline, in the SubSocket repo, run:
